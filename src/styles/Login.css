@@ -1,0 +1,40 @@
+.flex-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;   
+    align-items: center;
+    background-color: #00000093;
+    padding: 15px;
+    margin: auto;
+    border-radius: 50px;
+    width: 80%;
+    max-width: 800px;
+}
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+}
+.login{
+    background-color: #0000009f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 20px;
+    text-align: center;
+    align-items: center;
+    cursor: pointer;
+}
+input{
+    background-color: #fdfcfc36;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 20px;
+}

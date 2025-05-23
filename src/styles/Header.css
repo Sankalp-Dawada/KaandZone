@@ -1,0 +1,51 @@
+header{
+    background-color: #00000093;
+    padding: 30px;
+    text-align: center;
+    color: white;
+    position: relative;
+    z-index: 10;
+}
+
+nav ul{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+nav ul li{
+    text-decoration: none;
+    text-decoration-color: aliceblue;
+    display: inline;
+    margin: 0 10px;
+    color: white;
+    cursor: pointer;
+}
+Link{
+    text-decoration: none;
+    color: white;
+}
+
+.game-home{
+    color: white;
+    text-decoration: none;
+    font-size: 30px;
+}
+
+.game-login{
+    color: white;
+    text-decoration: none;
+    font-size: 30px;
+}
+
+.game-login:hover{
+    color: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 35%, #0f0f1e 100%);
+}
+
+.background-effects,
+.grid-overlay {
+    pointer-events: none;
+    z-index: 0;
+}

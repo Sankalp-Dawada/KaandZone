@@ -1,0 +1,39 @@
+.flex-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    background-color: #0000009f;
+    padding: 15px;
+    margin: auto;
+    border-radius: 50px;
+}
+.flex-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+
+}
+label{
+    color: white;
+    font-size: 30px;
+    margin-right: 10px;
+}
+select{
+    background-color: #0000009f;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 20px;
+}
+option{
+    background-color: #0000009f;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 20px;
+}
+

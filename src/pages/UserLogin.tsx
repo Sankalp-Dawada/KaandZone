@@ -1,7 +1,10 @@
+import { doc, setDoc } from "firebase/firestore";
 import Header from "../components/Header";
+import { db } from "../configuration/firebase";
 // import "../styles/Home.css";
 import "../styles/Login.css";
 import { useState } from "react";
+import type { User } from "../types";
 function UserLogin() {
     const [username, setUsername] = useState<string>('');
     return (
@@ -29,9 +32,18 @@ function UserLogin() {
                         <button
                             className='login'
                             type="button"
-                            onClick={() => {
+                            onClick={ async () => {
                                 if (username.trim() !== '')
-                                    window.location.href = '/home';
+                                    try {
+                                        const user: User = { username };
+                                        await setDoc(doc(db, 'login', user.username), user, { merge: true });
+                                        localStorage.setItem('username', user.username);
+                                        window.location.href = '/';
+                                    }
+                                    catch (e) {
+                                        console.error("Error adding document: ", e);
+                                        alert('Error adding document: ' + e);
+                                    }
                                 else alert('Please enter a username');
                             }}>
                             Login

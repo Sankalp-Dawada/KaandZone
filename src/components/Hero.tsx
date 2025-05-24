@@ -24,12 +24,6 @@ function Hero() {
                 <option value="Guess Character">Guess the character</option>
                 <option value="Answer the question">Answer the Question</option>
             </select>
-            <button
-                className="create-room-button"
-                onClick={() => { window.location.href = '/createroom'; }}
-            >
-                Create Room
-            </button>
             </div>
             <br /><br />
             {

@@ -1,60 +1,78 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import '../styles/Login.css';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../configuration/firebase';
 
-function AdminLogin(){
-    const [username, setUsername] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    return(
-        <>
-            <Header />
-            <div className="background-effects">
-                <div className="grid-overlay"></div>
-                </div>
-            <div className="content-wrapper">
-                <div className='flex-column'>
-                    <form>
-                    <h1>Admin Login</h1>
-                        <div className='flex-row'>
-                            <label htmlFor="username">Username:</label>
-                            <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            required
-                            value={username}
-                            onChange={e => setUsername(e.target.value)}
-                            />
-                        </div>
-                        <div className='flex-row'>
-                            <label htmlFor="password">Password:</label>
-                            <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            />
-                        </div>
-                        <label htmlFor="Enter Username" hidden>Enter Username</label>
-                        <button
-                            className='login'
-                            type="button"
-                            onClick={() => {
-                                if (username.trim() === 'admin' && password.trim() === 'admin')
-                                    window.location.href = '/home';
-                                else if (username.trim() === '' && password.trim() === '')
-                                    alert('Please enter a username and password');
-                                else alert('Username or Password incorrect');
-                            }}>
-                            Login
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </>
-    )
+function AdminLogin() {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+
+  const handleLogin = async () => {
+    if (email.trim() === '' || password.trim() === '') {
+      alert('Please enter an email and password');
+      return;
+    }
+
+    try {
+      const docRef = doc(db, 'AdminLogin', 'SankalpDawada');
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (email.trim() === data.Email && password.trim() === data.Password) {
+          localStorage.setItem('isAdmin', 'true');
+          window.location.href = '/';
+        } else {
+          alert('Email or Password incorrect');
+        }
+      } else {
+        alert('No such admin found');
+      }
+    } catch (error) {
+      console.error('Login Error:', error);
+      alert('Something went wrong during login');
+    }
+  };
+
+  return (
+    <>
+      <Header />
+      <div className="background-effects">
+        <div className="grid-overlay"></div>
+      </div>
+      <div className="content-wrapper">
+        <div className="flex-column">
+          <h1>Admin Login</h1>
+          <div className="flex-row">
+            <label htmlFor="email">Email: </label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="flex-row">
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button className="login" type="button" onClick={handleLogin}>
+            Login
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default AdminLogin;

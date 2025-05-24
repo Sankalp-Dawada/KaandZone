@@ -68,7 +68,7 @@ function CreateRoom() {
                 </>
             }
             <button onClick={()=>{
-                window.location.href = '/home';
+                window.location.href = '/';
             }}>Create Room</button>
 
 

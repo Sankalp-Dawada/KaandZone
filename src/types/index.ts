@@ -1,25 +1,27 @@
-interface RRCP{
+export interface RRCP{
     Raja: number;
     Rani: number;
     Police: number;
     Chor: number;
     Civilians: number;
 }
-interface NightMafia{
+export interface NightMafia{
     Mafia: number;
     Doctor: number;
     Police: number;
     Civilians: number;
 }
-interface GuessTheCharacter{
+export interface GuessTheCharacter{
     Character: string;
 
 }
-interface AnswerTheQuestion{
+export interface AnswerTheQuestion{
     Question: string;
     Answer: string;
 }
-interface Game {
-    name: string;
-    roles: RRCP | NightMafia | GuessTheCharacter | AnswerTheQuestion;
+export interface User {
+    username: string;
+}
+export interface Admin {
+    isAdmin: boolean;
 }

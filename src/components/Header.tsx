@@ -3,6 +3,7 @@ import { db } from "../configuration/firebase";
 import { doc, deleteDoc } from "firebase/firestore";
 import '../styles/Header.css';
 import { useEffect, useState } from "react";
+import logo from '../assets/logo.png';
 
 function Header() {
   const location = useLocation();
@@ -40,8 +41,11 @@ function Header() {
     <header className="game-header">
       <nav className="game-nav">
         <ul className="game-nav-list">
-          <li>
-            <Link className="game-link" to="/">KaandZone</Link>
+          <li className="logo-title">
+            <Link className="game-link" to="/">
+              <img src={logo} alt="KaandZone" className="header-logo"/>
+              <span className="header-title">KaandZone</span>
+            </Link>
           </li>
 
           {location.pathname === "/userlogin" && (

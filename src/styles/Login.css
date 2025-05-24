@@ -1,8 +1,8 @@
-.flex-column {
+.login-column {
     display: flex;
     flex-direction: column;
-    justify-content: center;   
-    align-items: center;
+    /* justify-content: center;    */
+    /* align-items: center; */
     background-color: #00000093;
     padding: 15px;
     margin: auto;
@@ -10,14 +10,13 @@
     width: 80%;
     max-width: 800px;
 }
-.flex-row {
+.login-row {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-    width: 100%;
-    margin: 10px 0;
     padding: 10px;
+    margin: 15px;
 }
 .login{
     background-color: #0000009f;
@@ -37,4 +36,17 @@ input{
     padding: 10px;
     border-radius: 5px;
     font-size: 20px;
+}
+.login-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+.login-header{
+    text-align: center;
+    color: white;
+    font-size: 35px;
+    font-weight: bold;
+    margin-bottom: 15px;
 }

@@ -42,9 +42,9 @@ function AdminLogin() {
         <div className="grid-overlay"></div>
       </div>
       <div className="content-wrapper">
-        <div className="flex-column">
-          <h1>Admin Login</h1>
-          <div className="flex-row">
+        <div className="login-column">
+          <header className='login-header'>Admin Login</header>
+          <div className="login-row">
             <label htmlFor="email">Email: </label>
             <input
               type="text"
@@ -55,8 +55,8 @@ function AdminLogin() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="flex-row">
-            <label htmlFor="password">Password:</label>
+          <div className="login-row">
+            <label htmlFor="password">Password: </label>
             <input
               type="password"
               id="password"
@@ -66,9 +66,11 @@ function AdminLogin() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <div className='login-button'>
           <button className="login" type="button" onClick={handleLogin}>
             Login
           </button>
+          </div>
         </div>
       </div>
     </>

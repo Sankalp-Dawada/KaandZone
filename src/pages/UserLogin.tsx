@@ -14,10 +14,10 @@ function UserLogin() {
                 <div className="grid-overlay"></div>
             </div>
             <div className="content-wrapper">
-                <div className='flex-column'>
-                    <h1>User Login</h1>
+                <div className='login-column'>
+                    <header className='login-header'>User Login</header>
                     <form>
-                        <div className='flex-row'>
+                        <div className='login-row'>
                             <label htmlFor="username">Username:</label>
                             <input
                                 type="text"
@@ -28,26 +28,28 @@ function UserLogin() {
                                 onChange={e => setUsername(e.target.value)}
                             />
                         </div>
-                        <label htmlFor="Enter Username" hidden>Enter Username</label>
-                        <button
-                            className='login'
-                            type="button"
-                            onClick={ async () => {
-                                if (username.trim() !== '')
-                                    try {
-                                        const user: User = { username };
-                                        await setDoc(doc(db, 'login', user.username), user, { merge: true });
-                                        localStorage.setItem('username', user.username);
-                                        window.location.href = '/';
-                                    }
-                                    catch (e) {
-                                        console.error("Error adding document: ", e);
-                                        alert('Error adding document: ' + e);
-                                    }
-                                else alert('Please enter a username');
-                            }}>
-                            Login
-                        </button>
+                        {/* <label htmlFor="Enter Username" hidden>Enter Username</label> */}
+                        <div className="login-button">
+                            <button
+                                className='login'
+                                type="button"
+                                onClick={async () => {
+                                    if (username.trim() !== '')
+                                        try {
+                                            const user: User = { username };
+                                            await setDoc(doc(db, 'login', user.username), user, { merge: true });
+                                            localStorage.setItem('username', user.username);
+                                            window.location.href = '/';
+                                        }
+                                        catch (e) {
+                                            console.error("Error adding document: ", e);
+                                            alert('Error adding document: ' + e);
+                                        }
+                                    else alert('Please enter a username');
+                                }}>
+                                Login
+                            </button>
+                        </div>
                     </form>
                 </div>
 

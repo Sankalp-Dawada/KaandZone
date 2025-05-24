@@ -1,0 +1,44 @@
+.create-room-column {
+    display: flex;
+    flex-direction: column;
+    background-color: #00000093; 
+    padding: 15px;
+    margin: auto;
+    border-radius: 50px;
+    width: 80%;
+    max-width: 800px;
+}
+.button-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 10px;
+}
+.create-room-button {
+    background-color: #1a1a2e;
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.create-room-button:hover {
+    background-color: #16213e;
+}
+.create-room-header{
+    text-align: center;
+    color: white;
+    font-size: 35px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.create-room-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px;
+    padding: 20px;
+}

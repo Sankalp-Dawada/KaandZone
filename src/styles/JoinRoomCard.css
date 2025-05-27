@@ -1,0 +1,129 @@
+.jr-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.jr-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border-color: #a78bfa;
+}
+
+.jr-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.jr-container:hover::before {
+  left: 100%;
+}
+
+.jr-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+.room-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.room-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 8px;
+}
+
+.room-details {
+  font-size: 0.95rem;
+  color: #cbd5e0;
+  margin: 0;
+}
+
+.room-details strong {
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.room-id {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+.room-id strong {
+  color: #a78bfa;
+}
+
+.jr-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.jr-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.jr-button:disabled {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.jr-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 480px) {
+  .jr-container {
+    padding: 15px;
+  }
+  
+  .room-name {
+    font-size: 1.1rem;
+  }
+  
+  .room-details {
+    font-size: 0.9rem;
+  }
+  
+  .jr-button {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+  }
+}

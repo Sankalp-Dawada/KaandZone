@@ -1,0 +1,214 @@
+.join-room-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: white;
+}
+
+.join-room-container h1 {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.room-type-selector {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+}
+
+.room-type-selector label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.room-type-selector select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 15px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.room-type-selector select:focus {
+  outline: none;
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.3);
+}
+
+.private-room-section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.private-room-section h2 {
+  color: #f8fafc;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.private-room-input {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.private-room-input label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.private-room-input input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  font-size: 1rem;
+  width: 300px;
+  max-width: 100%;
+}
+
+.private-room-input input:focus {
+  outline: none;
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.3);
+}
+
+.private-room-input input::placeholder {
+  color: #94a3b8;
+}
+
+.join-private-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.join-private-btn:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.public-rooms-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.public-rooms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.public-rooms-header h2 {
+  color: #f8fafc;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #a78bfa;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.loading {
+  text-align: center;
+  color: #cbd5e0;
+  font-size: 1.1rem;
+  padding: 40px;
+}
+
+.no-rooms {
+  text-align: center;
+  color: #cbd5e0;
+  font-size: 1.1rem;
+  padding: 40px;
+}
+
+.no-rooms p {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .join-room-container {
+    padding: 15px;
+  }
+  
+  .rooms-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .join-room-container h1 {
+    font-size: 2rem;
+  }
+  
+  .room-type-selector {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .public-rooms-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .private-room-input input {
+    width: 100%;
+  }
+}

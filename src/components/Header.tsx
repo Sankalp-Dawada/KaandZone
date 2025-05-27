@@ -62,6 +62,8 @@ function Header() {
 
           {location.pathname === "/" && (username || isAdmin) ? (
             <li className="link-row">
+              <Link className="game-link" to="/profile">Profile</Link>
+              <Link className="game-link" to="/join-room">Join Room</Link>
               <Link className="game-link" to="/create-room">Create Room</Link>
               <a href="#" onClick={handleLogout}>Logout</a>
             </li>

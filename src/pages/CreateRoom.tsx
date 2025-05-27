@@ -4,12 +4,19 @@ import "../styles/CreateRoom.css";
 import { db } from "../services/firebase";
 import { doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
-
 function CreateRoom() {
     const [selectedGame, setSelectedGame] = useState("Raja Rani Chor Police");
     const [roomname, setRoomname] = useState("");
     const [numberOfPlayers, setNumberOfPlayers] = useState(1);
     const [selectedNumber, setSelectedNumber] = useState("1");
+    const [visibility, setVisibility] = useState("public");
+
+    // Generate unique room ID
+    const generateRoomId = () => {
+        const timestamp = Date.now().toString(36);
+        const randomStr = Math.random().toString(36).substring(2, 8);
+        return `${timestamp}${randomStr}`.toUpperCase();
+    };
 
     const handleRoomCreation = async () => {
         if (roomname.trim() === "") {
@@ -27,27 +34,33 @@ function CreateRoom() {
             return;
         }
 
+        const uniqueRoomId = generateRoomId();
+        
         const roomData = {
+            roomId: uniqueRoomId,
             roomname,
             gameType: selectedGame,
             numberOfPlayers,
             createdBy: username,
             selectedNumber,
+            visibility,
             createdAt: new Date().toISOString(),
+            PlayersName: [username], 
+            Points: [0] 
         };
 
         try {
-            // Save room info
-            await setDoc(doc(db, "rooms", roomname), roomData);
+            
+            await setDoc(doc(db, "rooms", uniqueRoomId), roomData);
 
-            // Update user with host info
+            
             await updateDoc(doc(db, "users", username), {
                 isHost: true,
-                roomId: arrayUnion(roomname),
+                roomId: arrayUnion(uniqueRoomId),
                 gameType: arrayUnion(selectedGame)
             });
 
-            localStorage.setItem("roomname", roomname);
+            localStorage.setItem("roomname", uniqueRoomId);
             window.location.href = "/room";
 
         } catch (e) {
@@ -56,19 +69,16 @@ function CreateRoom() {
         }
     };
 
-
     return (
         <>
             <Header />
             <div className="background-effects">
                 <div className="grid-overlay"></div>
-                {/* <div className="glow-orb glow-orb-1"></div>
-                <div className="glow-orb glow-orb-2"></div>
-                <div className="glow-orb glow-orb-3"></div> */}
             </div>
             <div className="content-wrapper">
                 <div className="create-room-column">
                     <header className="create-room-header">Create Room</header>
+                    
                     <div className="create-room-row">
                         <label htmlFor="room-name">Room Name: </label>
                         <input
@@ -77,7 +87,8 @@ function CreateRoom() {
                             name="room-name"
                             value={roomname}
                             onChange={(e) => setRoomname(e.target.value)}
-                            required />
+                            required 
+                        />
                     </div>
 
                     <div className="create-room-row">
@@ -88,8 +99,25 @@ function CreateRoom() {
                             name="Numberofplayers"
                             value={numberOfPlayers}
                             onChange={(e) => setNumberOfPlayers(Number(e.target.value))}
-                            required />
+                            min="4"
+                            max="20"
+                            required 
+                        />
                     </div>
+
+                    <div className="create-room-row">
+                        <label htmlFor="visibility">Room Visibility: </label>
+                        <select
+                            name="visibility"
+                            id="visibility"
+                            value={visibility}
+                            onChange={(e) => setVisibility(e.target.value)}
+                        >
+                            <option value="public">Public</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div>
+                    
                     <div className="create-room-row">
                         <label htmlFor="game-name">Choose a Game Type: </label>
                         <select
@@ -104,54 +132,51 @@ function CreateRoom() {
                             <option value="Answer the question">Answer the Question</option>
                         </select>
                     </div>
+                    
                     <div className="create-room-row">
-                        {
-                            selectedGame === "Night Mafia"
-                            &&
+                        {selectedGame === "Night Mafia" && (
                             <>
-                                {/* <h2>Night Mafia</h2> */}
                                 <label htmlFor="NumberofMafia">Number of Mafia: </label>
                                 <select
                                     name="NumberofMafia"
                                     id="NumberofMafia"
                                     value={selectedNumber}
-                                    onChange={(e) => setSelectedNumber(e.target.value)}>
+                                    onChange={(e) => setSelectedNumber(e.target.value)}
+                                >
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
                                     <option value="random">Random</option>
                                 </select>
                             </>
-                        }
-                        {
-                            selectedGame === "Answer the question"
-                            &&
+                        )}
+                        {selectedGame === "Answer the question" && (
                             <>
-                                {/* <h2>Answer the Question</h2> */}
                                 <label htmlFor="NumberofImposters">Number of Imposters: </label>
                                 <select
                                     name="NumberofImposters"
                                     id="NumberofImposters"
                                     value={selectedNumber}
-                                    onChange={(e) => setSelectedNumber(e.target.value)}>
+                                    onChange={(e) => setSelectedNumber(e.target.value)}
+                                >
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
                                     <option value="random">Random</option>
                                 </select>
                             </>
-                        }
-
+                        )}
                     </div>
 
                     <div className="button-center">
-                        <button className="create-room-button" onClick={handleRoomCreation}>Create Room</button>
+                        <button className="create-room-button" onClick={handleRoomCreation}>
+                            Create Room
+                        </button>
                     </div>
-
                 </div>
             </div>
-
         </>
-    )
+    );
 }
-export default CreateRoom; 
+
+export default CreateRoom;

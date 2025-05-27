@@ -28,7 +28,6 @@ function UserLogin() {
                                 onChange={e => setUsername(e.target.value)}
                             />
                         </div>
-                        {/* <label htmlFor="Enter Username" hidden>Enter Username</label> */}
                         <div className="login-button">
                             <button
                                 className='login'

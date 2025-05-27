@@ -20,12 +20,13 @@ export interface AnswerTheQuestion{
 }
 export interface User {
     username: string;
-    roomId: Array<string>;
-    gameType: Array<string>;
-    isHost: boolean;
-    setPlayerPoints: Array<number>;
-    PlayersName: Array<string>;
+    roomId: string[];           
+    gameType: string[];         
+    isHost: boolean;            
+    setPlayerPoints: number[];  
+    PlayersName: string[];      
 }
+
 export interface Admin {
     isAdmin: boolean;
     setplayer: boolean;

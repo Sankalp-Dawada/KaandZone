@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import "../styles/CreateRoom.css";
+import { db } from "../services/firebase";
+import { doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
+
 
 function CreateRoom() {
     const [selectedGame, setSelectedGame] = useState("Raja Rani Chor Police");
@@ -8,40 +11,51 @@ function CreateRoom() {
     const [numberOfPlayers, setNumberOfPlayers] = useState(1);
     const [selectedNumber, setSelectedNumber] = useState("1");
 
-    const handleRoomCreation = () => {
+    const handleRoomCreation = async () => {
         if (roomname.trim() === "") {
             alert("Please enter a valid room name.");
+            return;
         }
         if (numberOfPlayers < 4) {
             alert("Number of players must be minimum 4.");
-        }
-        if (selectedGame === "Night Mafia" && selectedNumber === "random") {
-            // Randomly select number of mafia each round
-        }
-        if (selectedGame === "Answer the question" && selectedNumber === "random") {
-            // Randomly select number of imposters each round
-        }
-        if (selectedGame === "Night Mafia" && selectedNumber === "1") {
-            // Set 1 mafia
-        }
-        if (selectedGame === "Answer the question" && selectedNumber === "1") {
-            // Set 1 imposter
-        }
-        if (selectedGame === "Night Mafia" && selectedNumber === "2") {
-            // Set 2 mafia
-        }
-        if (selectedGame === "Answer the question" && selectedNumber === "2") {
-            // Set 2 imposters
-        }
-        if (selectedGame === "Night Mafia" && selectedNumber === "3") {
-            // Set 3 mafia
-        }
-        if (selectedGame === "Answer the question" && selectedNumber === "3") {
-            // Set 3 imposters
+            return;
         }
 
-        window.location.href = "/room";
+        const username = localStorage.getItem("username");
+        if (!username) {
+            alert("User not logged in.");
+            return;
+        }
+
+        const roomData = {
+            roomname,
+            gameType: selectedGame,
+            numberOfPlayers,
+            createdBy: username,
+            selectedNumber,
+            createdAt: new Date().toISOString(),
+        };
+
+        try {
+            // Save room info
+            await setDoc(doc(db, "rooms", roomname), roomData);
+
+            // Update user with host info
+            await updateDoc(doc(db, "users", username), {
+                isHost: true,
+                roomId: arrayUnion(roomname),
+                gameType: arrayUnion(selectedGame)
+            });
+
+            localStorage.setItem("roomname", roomname);
+            window.location.href = "/room";
+
+        } catch (e) {
+            console.error("Error creating room: ", e);
+            alert("Error creating room: " + e);
+        }
     };
+
 
     return (
         <>
@@ -97,11 +111,11 @@ function CreateRoom() {
                             <>
                                 {/* <h2>Night Mafia</h2> */}
                                 <label htmlFor="NumberofMafia">Number of Mafia: </label>
-                                <select 
-                                name="NumberofMafia" 
-                                id="NumberofMafia" 
-                                value={selectedNumber} 
-                                onChange={(e) => setSelectedNumber(e.target.value)}>
+                                <select
+                                    name="NumberofMafia"
+                                    id="NumberofMafia"
+                                    value={selectedNumber}
+                                    onChange={(e) => setSelectedNumber(e.target.value)}>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -115,11 +129,11 @@ function CreateRoom() {
                             <>
                                 {/* <h2>Answer the Question</h2> */}
                                 <label htmlFor="NumberofImposters">Number of Imposters: </label>
-                                <select 
-                                name="NumberofImposters" 
-                                id="NumberofImposters" 
-                                value={selectedNumber} 
-                                onChange={(e) => setSelectedNumber(e.target.value)}>
+                                <select
+                                    name="NumberofImposters"
+                                    id="NumberofImposters"
+                                    value={selectedNumber}
+                                    onChange={(e) => setSelectedNumber(e.target.value)}>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>

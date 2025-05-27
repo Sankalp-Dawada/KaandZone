@@ -34,21 +34,32 @@ function UserLogin() {
                                 className='login'
                                 type="button"
                                 onClick={async () => {
-                                    if (username.trim() !== '')
+                                    if (username.trim() !== '') {
                                         try {
-                                            const user: User = { username };
-                                            await setDoc(doc(db, 'login', user.username), user, { merge: true });
+                                            const user: User = {
+                                                username,
+                                                roomId: [],
+                                                gameType: [],
+                                                isHost: false,
+                                                setPlayerPoints: [],
+                                                PlayersName: [],
+                                            };
+
+                                            await setDoc(doc(db, 'users', user.username), user, { merge: true });
                                             localStorage.setItem('username', user.username);
                                             window.location.href = '/';
-                                        }
-                                        catch (e) {
+                                        } catch (e) {
                                             console.error("Error adding document: ", e);
                                             alert('Error adding document: ' + e);
                                         }
-                                    else alert('Please enter a username');
-                                }}>
+                                    } else {
+                                        alert('Please enter a username');
+                                    }
+                                }}
+                            >
                                 Login
                             </button>
+
                         </div>
                     </form>
                 </div>

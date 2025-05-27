@@ -1,5 +1,6 @@
 import Header from "../components/Header";
 import Hero from "../components/Hero";
+import JoinRoom from "../components/JoinRoom";
 import "../styles/Home.css";
 
 function Home() {
@@ -14,6 +15,10 @@ function Home() {
             </div>
             <div className="content-wrapper">
                 <Hero />
+                <div>
+                    Join Rooms
+                </div>
+                <JoinRoom/>
             </div>    
         </>
     );

@@ -1,6 +1,6 @@
 import { doc, setDoc } from "firebase/firestore";
 import Header from "../components/Header";
-import { db } from "../configuration/firebase";
+import { db } from "../services/firebase";
 // import "../styles/Home.css";
 import "../styles/Login.css";
 import { useState } from "react";

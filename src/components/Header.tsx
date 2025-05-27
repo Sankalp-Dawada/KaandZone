@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { db } from "../configuration/firebase";
+import { db } from "../services/firebase";
 import { doc, deleteDoc } from "firebase/firestore";
 import '../styles/Header.css';
 import { useEffect, useState } from "react";

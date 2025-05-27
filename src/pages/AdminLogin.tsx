@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import '../styles/Login.css';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../configuration/firebase';
+import { db } from '../services/firebase';
 
 function AdminLogin() {
   const [email, setEmail] = useState<string>('');

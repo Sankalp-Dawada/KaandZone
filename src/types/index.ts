@@ -13,7 +13,6 @@ export interface NightMafia{
 }
 export interface GuessTheCharacter{
     Character: string;
-
 }
 export interface AnswerTheQuestion{
     Question: string;
@@ -21,7 +20,16 @@ export interface AnswerTheQuestion{
 }
 export interface User {
     username: string;
+    roomId: Array<string>;
+    gameType: Array<string>;
+    isHost: boolean;
+    setPlayerPoints: Array<number>;
+    PlayersName: Array<string>;
 }
 export interface Admin {
     isAdmin: boolean;
+    setplayer: boolean;
+    roomId: Array<string>;
+    gameType: Array<string>;
+    IsHost: boolean;
 }

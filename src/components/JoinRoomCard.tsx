@@ -1,4 +1,3 @@
-import React from 'react';
 import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 import '../styles/JoinRoomCard.css';

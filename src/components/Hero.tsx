@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import RRCP from "./Raja Rani Chor Police";
 import NightMafia from "./Night Mafia";
 import GuessTheCharacter from "./Guess the Character";

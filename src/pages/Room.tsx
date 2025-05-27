@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { db } from "../services/firebase";
 import {
@@ -10,7 +11,16 @@ import "../styles/Room.css";
 import Header from "../components/Header";
 
 function Room() {
-  const [roomData, setRoomData] = useState<any>(null);
+  interface RoomData {
+    roomname: string;
+    gameType: string;
+    numberOfPlayers: number;
+    PlayersName: string[];
+    Points: number[];
+    visibility?: string;
+  }
+  
+    const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editingPoints, setEditingPoints] = useState<{ [key: string]: number }>({});
@@ -27,19 +37,19 @@ function Room() {
 
     const fetchRoom = async () => {
       try {
-        const roomRef = doc(db, "rooms", roomname);
+        const roomRef = doc(db, "rooms", roomname as string);
         const roomSnap = await getDoc(roomRef);
 
         if (!roomSnap.exists()) {
           setError("Room not found");
         } else {
-          const data = roomSnap.data();
+          const data = roomSnap.data() as RoomData;
           setRoomData(data);
           setEditingPoints(
-            data.PlayersName?.reduce((acc: any, name: string, idx: number) => {
+            data.PlayersName?.reduce((acc: Record<string, number>, name: string, idx: number) => {
               acc[name] = data?.Points?.[idx] || 0;
               return acc;
-            }, {}) || {}
+            }, {} as Record<string, number>) || {}
           );
         }
       } catch (e) {
@@ -85,18 +95,22 @@ function Room() {
   };
 
   const updatePoints = async () => {
+    if (!roomData) {
+      alert("Room data is not available.");
+      return;
+    }
     const newPoints = roomData.PlayersName.map(
       (player: string) => editingPoints[player] || 0
     );
 
     try {
-      const roomRef = doc(db, "rooms", roomname);
+      const roomRef = doc(db, "rooms", roomname || "");
       await updateDoc(roomRef, {
         Points: newPoints,
       });
 
-      setRoomData((prev: any) => ({
-        ...prev,
+      setRoomData((prev: RoomData | null) => ({
+        ...prev!,
         Points: newPoints,
       }));
       
@@ -109,6 +123,10 @@ function Room() {
   const deleteRoom = async () => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
 
+    if (!roomname) {
+      alert("No room selected to delete.");
+      return;
+    }
     try {
       await deleteDoc(doc(db, "rooms", roomname));
       localStorage.removeItem("roomname");
@@ -127,7 +145,7 @@ function Room() {
     const newVisibility = e.target.value;
 
     try {
-      const roomRef = doc(db, "rooms", roomname);
+      const roomRef = doc(db, "rooms", roomname || "");
       await updateDoc(roomRef, { visibility: newVisibility });
 
       setRoomData((prev: any) => ({
@@ -170,7 +188,7 @@ function Room() {
         <div className="grid-overlay"></div>
       </div>
       <div className="content-wrapper">
-        <header className="room-header">Room: {roomData.roomname}</header>
+        <header className="room-header">Room: {roomData?.roomname}</header>
         
         {/* Room ID Section */}
         <div className="room-id-section">
@@ -187,15 +205,15 @@ function Room() {
         </div>
 
         <div className="room-details">
-          <div>Game Type: {roomData.gameType}</div>
-          <div>Number of Players: {roomData.numberOfPlayers}</div>
-          <div>Current Players: {roomData.PlayersName?.length || 0}</div>
+          <div>Game Type: {roomData?.gameType}</div>
+          <div>Number of Players: {roomData?.numberOfPlayers}</div>
+          <div>Current Players: {roomData?.PlayersName?.length || 0}</div>
 
           <div className="visibility-control">
             <label htmlFor="visibility">Room Visibility: </label>
             <select
               id="visibility"
-              value={roomData.visibility || "public"}
+              value={roomData?.visibility || "public"}
               onChange={handleVisibilityChange}
             >
               <option value="public">Public</option>
@@ -206,7 +224,7 @@ function Room() {
 
         <div className="leaderboard">
           <h2>Leaderboard</h2>
-          {roomData.PlayersName && roomData.PlayersName.length > 0 ? (
+          {roomData?.PlayersName && roomData.PlayersName.length > 0 ? (
             <table>
               <thead>
                 <tr>
@@ -220,7 +238,7 @@ function Room() {
                 {roomData.PlayersName
                   .map((player: string, idx: number) => ({
                     player,
-                    points: roomData.Points?.[idx] || 0,
+                    points: roomData?.Points?.[idx] || 0,
                     originalIndex: idx
                   }))
                   .sort((a: any, b: any) => b.points - a.points)

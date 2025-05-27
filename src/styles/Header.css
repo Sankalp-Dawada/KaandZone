@@ -79,3 +79,39 @@ a{
     font-family: inherit;
     vertical-align: middle;
 }
+
+@media (max-width: 900px) {
+    .header-title, .game-link, a {
+        font-size: 24px;
+    }
+    .header-logo {
+        height: 40px;
+        margin-right: 8px;
+    }
+    .link-row {
+        gap: 10px;
+    }
+}
+@media (max-width: 600px) {
+    .game-header {
+        padding: 10px;
+    }
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .logo-title {
+        justify-content: center;
+    }
+    .header-title, .game-link, a {
+        font-size: 18px;
+    }
+    .header-logo {
+        height: 28px;
+        margin-right: 5px;
+    }
+    .link-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+}

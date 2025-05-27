@@ -212,3 +212,21 @@
     width: 100%;
   }
 }
+
+@media (max-width: 480px) {
+  .join-room-container {
+    padding: 5px;
+  }
+  .room-type-selector, .private-room-section, .public-rooms-section {
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .public-rooms-header h2, .private-room-section h2 {
+    font-size: 1.1rem;
+  }
+  .refresh-btn, .join-private-btn {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+  }
+}

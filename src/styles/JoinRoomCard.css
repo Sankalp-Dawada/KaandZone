@@ -127,3 +127,19 @@
     font-size: 0.95rem;
   }
 }
+
+@media (max-width: 350px) {
+  .jr-container {
+    padding: 5px;
+    border-radius: 6px;
+  }
+  .room-name {
+    font-size: 0.95rem;
+    padding-bottom: 4px;
+  }
+  .jr-button {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+    border-radius: 5px;
+  }
+}

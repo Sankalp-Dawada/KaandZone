@@ -51,5 +51,22 @@ body {
     background: linear-gradient(30deg,black, darkslategray );
 }
 
+@media (max-width: 900px) {
+    .content-wrapper {
+        padding: 10px;
+    }
+    body {
+        font-size: 16px;
+    }
+}
+@media (max-width: 600px) {
+    .content-wrapper {
+        padding: 5px;
+    }
+    body {
+        font-size: 14px;
+    }
+}
+
 
 

@@ -143,3 +143,26 @@
     font-size: 2rem;
   }
 }
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 5px;
+  }
+  .rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .profile-info, .room-card {
+    padding: 10px;
+    border-radius: 8px;
+  }
+  .room-card h3 {
+    font-size: 1rem;
+    padding-bottom: 4px;
+  }
+  .join-room-btn {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+  }
+}

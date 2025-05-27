@@ -42,3 +42,39 @@
     margin: 30px;
     padding: 20px;
 }
+
+@media (max-width: 768px) {
+    .create-room-column {
+        width: 98%;
+        padding: 10px;
+        border-radius: 25px;
+        max-width: 100%;
+    }
+    .create-room-header {
+        font-size: 24px;
+    }
+    .create-room-row {
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 10px 0;
+        padding: 10px 0;
+    }
+    .create-room-button {
+        font-size: 16px;
+        padding: 10px 16px;
+    }
+    label, input, select {
+        font-size: 16px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+@media (max-width: 480px) {
+    .create-room-header {
+        font-size: 18px;
+    }
+    .create-room-column {
+        border-radius: 10px;
+        padding: 5px;
+    }
+}

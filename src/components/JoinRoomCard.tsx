@@ -18,7 +18,7 @@ function JoinRoomCard({ roomId, roomName, gameType, numberOfPlayers, currentPlay
         
         if (!username) {
             alert("Please login first to join a room.");
-            window.location.href = "/user-login";
+            window.location.href = "/userlogin";
             return;
         }
 

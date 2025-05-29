@@ -11,7 +11,6 @@ function CreateRoom() {
     const [selectedNumber, setSelectedNumber] = useState("1");
     const [visibility, setVisibility] = useState("public");
 
-    // Generate unique room ID
     const generateRoomId = () => {
         const timestamp = Date.now().toString(36);
         const randomStr = Math.random().toString(36).substring(2, 8);
@@ -128,7 +127,7 @@ function CreateRoom() {
                         >
                             <option value="Raja Rani Chor Police">Raja Rani Chor Police</option>
                             <option value="Night Mafia">Night Mafia</option>
-                            <option value="Guess Character">Guess the character</option>
+                            <option value="Guess the character">Guess the character</option>
                             <option value="Answer the question">Answer the Question</option>
                         </select>
                     </div>

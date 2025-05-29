@@ -21,7 +21,7 @@ function Hero() {
             >
                 <option value="Raja Rani Chor Police">Raja Rani Chor Police</option>
                 <option value="Night Mafia">Night Mafia</option>
-                <option value="Guess Character">Guess the character</option>
+                <option value="Guess the character">Guess the character</option>
                 <option value="Answer the question">Answer the Question</option>
             </select>
             </div>
@@ -40,7 +40,7 @@ function Hero() {
             </>
             }
             {
-            selectedGame === "Guess Character" 
+            selectedGame === "Guess the character" 
             && 
             <>
             <div className="flex-container"><GuessTheCharacter /></div>

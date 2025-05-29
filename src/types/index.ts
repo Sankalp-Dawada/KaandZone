@@ -27,6 +27,16 @@ export interface User {
     PlayersName: string[];      
 }
 
+export interface RoomData {
+    roomname: string;
+    gameType: string;
+    numberOfPlayers: number;
+    PlayersName: string[];
+    Points: number[];
+    visibility?: string;
+    createdBy?: string;
+}
+
 export interface Admin {
     isAdmin: boolean;
     setplayer: boolean;

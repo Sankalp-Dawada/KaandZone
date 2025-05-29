@@ -1,15 +1,22 @@
-<img src="./src/assets/logo.png" width=auto height=auto style="vertical-align:middle;" />
+<img src="./src/assets/logo.png" height="80" style="vertical-align:middle;" />
 
 # KaandZone
 
-**KaandZone** is a web-based platform for playing social deduction and party games online with friends. It features games like Raja Rani Chor Police, Night Mafia, Guess the Character, and Answer the Question.
+**KaandZone** is a web-based platform for playing social deduction and party games online with friends. Play classics like Raja Rani Chor Police, Night Mafia, Guess the Character, and Answer the Question — all in your browser!
 
 ## Features
 
 - User and Admin login
-- Create and join game rooms
-- Multiple game types with unique rules
+- Create and join public/private game rooms
+- Multiple game types with unique rules:
+  - Raja Rani Chor Police
+  - Night Mafia
+  - Guess the Character
+  - Answer the Question
 - Responsive, modern UI with dark theme
+- Leaderboard and room management
+- Gemini AI API integration for advanced game logic
+- Hosted live at: [https://kaandzone.netlify.app/](https://kaandzone.netlify.app/)
 - Built with React, TypeScript, Firebase, and React Router
 
 ## Project Structure
@@ -17,13 +24,14 @@
 ```
 src/
   assets/           # Static assets (logo, images)
-  components/       # Reusable React components
-  configuration/    # Firebase configuration
-  pages/            # Page-level React components
-  styles/           # CSS files
+  components/       # Reusable React components (Header, Hero, Game Info, etc.)
+  pages/            # Page-level React components (Home, Login, Room, Profile, etc.)
+  services/         # Firebase service
+  styles/           # CSS files for each page/component
   types/            # TypeScript types
-  App.tsx           # Main app component
+  App.tsx           # Main app component (routing)
   main.tsx          # Entry point
+  index.css         # Global styles
 ```
 
 ## Getting Started
@@ -38,7 +46,7 @@ src/
 1. **Clone the repository:**
    ```sh
    git clone https://github.com/Sankalp-Dawada/KaandZone.git
-   cd kaandzone
+   cd KaandZone
    ```
 
 2. **Install dependencies:**
@@ -49,7 +57,7 @@ src/
    ```
 
 3. **Configure Firebase:**
-   - Update `src/configuration/firebase.ts` with your Firebase project credentials.
+   - Update `src/services/firebase.ts` with your Firebase project credentials.
 
 4. **Run the development server:**
    ```sh
@@ -76,15 +84,17 @@ src/
 - [Firebase](https://firebase.google.com/)
 - [React Router](https://reactrouter.com/)
 - [Vite](https://vitejs.dev/)
+- [Gemini AI API](https://ai.google.dev/)
+
+## Live Demo
+
+Try it now: [https://kaandzone.netlify.app/](https://kaandzone.netlify.app/)
 
 ## TODO
 
-- Integrate Gemini API for choosing a random player
-- Show available rooms on the homepage
-- Add special features accessible only to admins
-- Add a leaderboard for players
-- Enhance room creation and management features
-- Host the site using Netlify
+- Fix the Exit button so users can reliably leave a room
+- Add user signup functionality
+- Implement admin special features
 
 ## License
 

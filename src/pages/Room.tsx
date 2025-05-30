@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { db } from "../services/firebase";
-import {
-  doc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { doc, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import "../styles/Room.css";
 import Header from "../components/Header";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { shuffle, updateGameState, CHARACTER_THEMES } from "../components/room/roomUtils";
+import RoomLeaderboard from "../components/room/RoomLeaderboard";
+import RoomActions from "../components/room/RoomActions";
+import GuessCharacterSection from "../components/room/GuessCharacterSection";
+import AnswerQuestionSection from "../components/room/AnswerQuestionSection";
+import NightMafiaSection from "../components/room/NightMafiaSection";
+import RRCPSection from "../components/room/RRCPSection";
 
 const GEMINI_API_KEY = "AIzaSyABYhInt2kphW9Lk2kAXknwV9cq_Vvr-s4";
 
@@ -110,41 +112,8 @@ function Room() {
 
   const isHost = roomData?.createdBy === username;
 
-  function shuffle<T>(arr: T[]): T[] {
-    return arr
-      .map((a) => [Math.random(), a] as [number, T])
-      .sort((a, b) => a[0] - b[0])
-      .map((a) => a[1]);
-  }
-
-  const updateGameState = async (gameState: any) => {
-    if (!roomname) return;
-
-    try {
-      const roomRef = doc(db, "rooms", roomname);
-      await updateDoc(roomRef, { gameState });
-    } catch (error) {
-      console.error("Error updating game state:", error);
-    }
-  };
-
-
-  const CHARACTER_THEMES = [
-    "Superheroes",
-    "Cartoon Characters",
-    "Movie Characters",
-    "Famous Scientists",
-    "Historical Figures",
-    "Mythological Characters",
-    "Disney Characters",
-    "Fictional Detectives",
-    "Video Game Characters",
-    "Famous Athletes"
-  ];
-
   const handlestartround = async () => {
     if (!roomData || !isHost) return;
-
 
     const theme = CHARACTER_THEMES[Math.floor(Math.random() * CHARACTER_THEMES.length)];
 
@@ -165,7 +134,6 @@ function Room() {
     if (roomData.gameType === "Guess Character" || roomData.gameType === "Guess the character") {
       const players = [...roomData.PlayersName];
 
-
       const prompt = `Suggest ${players.length} unique, well-known ${theme} for a guessing game. Respond as a comma-separated list, no extra text.`;
       const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -179,16 +147,13 @@ function Room() {
           characterList.push(`Character${characterList.length + 1}`);
         }
       } catch {
-
         characterList = [
           "Batman", "Sherlock Holmes", "Harry Potter", "Iron Man", "Spiderman", "Wonder Woman",
           "Albert Einstein", "Cleopatra", "Zeus", "Mickey Mouse"
         ].slice(0, players.length);
       }
 
-
       const shuffledCharacters = shuffle(characterList);
-
 
       const newRoles: { [player: string]: string } = {};
       players.forEach((player, idx) => {
@@ -199,7 +164,7 @@ function Room() {
       initialGameState.question = "";
       initialGameState.imposter = "";
 
-      await updateGameState(initialGameState);
+      await updateGameState(roomname!, initialGameState, db);
       return;
     } else if (roomData.gameType === "Answer the question") {
       const players = [...roomData.PlayersName];
@@ -258,7 +223,8 @@ function Room() {
       initialGameState.roles = newRoles;
       initialGameState.question = mainQ;
       initialGameState.imposter = imposterName;
-
+      await updateGameState(roomname!, initialGameState, db);
+      return;
     } else if (roomData.gameType === "Night Mafia") {
       const players = shuffle([...roomData.PlayersName]);
       const mafiaCount = Math.max(1, Math.floor(players.length / 4));
@@ -277,7 +243,8 @@ function Room() {
       }
 
       initialGameState.roles = newRoles;
-
+      await updateGameState(roomname!, initialGameState, db);
+      return;
     } else if (roomData.gameType === "Raja Rani Chor Police") {
       const players = shuffle([...roomData.PlayersName]);
 
@@ -297,9 +264,12 @@ function Room() {
       }
 
       initialGameState.roles = newRoles;
+      await updateGameState(roomname!, initialGameState, db);
+      return;
     }
 
-    await updateGameState(initialGameState);
+    // fallback
+    await updateGameState(roomname!, initialGameState, db);
   };
 
   const copyRoomId = async () => {
@@ -396,7 +366,7 @@ function Room() {
       showVoting: Object.keys(newAnswers).length >= (roomData?.PlayersName.length || 0)
     };
 
-    await updateGameState(newGameState);
+    await updateGameState(roomname!, newGameState, db);
   };
 
   const handleVote = async (voted: string) => {
@@ -409,9 +379,8 @@ function Room() {
       showResults: Object.keys(newVotes).length >= (roomData?.PlayersName.length || 0)
     };
 
-    await updateGameState(newGameState);
+    await updateGameState(roomname!, newGameState, db);
   };
-
 
   const handleRRCPResult = async (result: any) => {
     const newGameState = {
@@ -419,7 +388,7 @@ function Room() {
       rrcpResult: result,
       showResults: true
     };
-    await updateGameState(newGameState);
+    await updateGameState(roomname!, newGameState, db);
   };
 
 
@@ -469,7 +438,7 @@ function Room() {
       mafiaActions: updatedActions,
       showResults: allSubmitted
     };
-    await updateGameState(newGameState);
+    await updateGameState(roomname!, newGameState, db);
   };
 
   if (loading) return (
@@ -554,460 +523,74 @@ function Room() {
           </div>
         </div>
 
-        <div className="leaderboard">
-          <h2>Leaderboard</h2>
-          {roomData?.PlayersName && roomData.PlayersName.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Player</th>
-                  <th>Points</th>
-                  {isHost && <th>Edit</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {roomData.PlayersName
-                  .map((player: string, idx: number) => ({
-                    player,
-                    points: roomData?.Points?.[idx] || 0,
-                    originalIndex: idx
-                  }))
-                  .sort((a: any, b: any) => b.points - a.points)
-                  .map((playerData: any, rank: number) => (
-                    <tr key={playerData.originalIndex}>
-                      <td>{rank + 1}</td>
-                      <td>
-                        {playerData.player}
-                        {playerData.player === username && " (You)"}
-                        {playerData.player === roomData?.createdBy && " (Host)"}
-                      </td>
-                      <td>
-                        {isHost ? (
-                          <input
-                            type="number"
-                            value={editingPoints[playerData.player] ?? playerData.points}
-                            onChange={(e) => handlePointsChange(playerData.player, parseInt(e.target.value) || 0)}
-                          />
-                        ) : (
-                          playerData.points
-                        )}
-                      </td>
-                      {isHost && (
-                        <td>
-                          <button className="update-btn" onClick={updatePoints}>
-                            Save
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>No players yet</p>
-          )}
-        </div>
+        <RoomLeaderboard
+          roomData={roomData}
+          isHost={isHost}
+          username={username}
+          editingPoints={editingPoints}
+          handlePointsChange={handlePointsChange}
+          updatePoints={updatePoints}
+        />
 
-        <div className="room-actions">
-          {isHost && (
-            <>
-              <button className="delete-btn" onClick={deleteRoom}>Delete Room</button>
-              <button
-                className="start-btn"
-                onClick={handlestartround}
-                disabled={roundStarted}
-              >
-                {roundStarted ? "Round In Progress" : "Start Round"}
-              </button>
-
-              {roundStarted && (
-                <button className="end-btn" onClick={handleEndRound}>
-                  End Round
-                </button>
-              )}
-            </>
-          )}
-          <button className="exit-btn" onClick={exitRoom}>Exit Room</button>
-        </div>
+        <RoomActions
+          isHost={isHost}
+          roundStarted={roundStarted}
+          handlestartround={handlestartround}
+          handleEndRound={handleEndRound}
+          deleteRoom={deleteRoom}
+          exitRoom={exitRoom}
+        />
 
         {roundStarted && (
           <div className="round-section">
-            {(roomData?.gameType === "Guess Character" || roomData?.gameType === "Guess the character") && (
-              <>
-                <h3>Guess the Character</h3>
-
-                <div className="theme-info">
-                  <strong>Theme:</strong>{" "}
-                  {roomData?.gameState?.theme || "Random"}
-                </div>
-                <div className="game-info">
-                  <p>
-                    <strong>Your character:</strong>{" "}
-                    {roles[username!] ? "???" : "Loading..."}
-                  </p>
-                  <p>
-                    <em>
-                      Everyone else can see your character, but you can't! Try to discuss and guess what your character is.
-                    </em>
-                  </p>
-                </div>
-
-                <div className="players-roles">
-                  <h4>Other Players:</h4>
-                  <ul>
-                    {roomData.PlayersName.filter(p => p !== username).map(player => (
-                      <li key={player}>
-                        {player}: {roles[player] || "Loading..."}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {!answers[username!] && (
-                  <div className="answer-section">
-                    <label>Your guess or description:</label>
-                    <input
-                      type="text"
-                      placeholder="Enter your answer"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAnswer(e.currentTarget.value);
-                        }
-                      }}
-                    />
-                    <button className="submit-btn" onClick={(e) => {
-                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                      handleAnswer(input.value);
-                    }}>
-                      Submit Answer
-                    </button>
-                  </div>
-                )}
-
-                {answers[username!] && (
-                  <div>Your answer: <strong>{answers[username!]}</strong></div>
-                )}
-
-                {showVoting && !votes[username!] && (
-                  <div className="voting-section">
-                    <h4>Vote: Who guessed their character best?</h4>
-                    <div className="vote-buttons">
-                      {roomData.PlayersName.filter(p => p !== username).map(player => (
-                        <button className="vote-btn" key={player} onClick={() => handleVote(player)}>
-                          {player}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {showResults && (
-                  <div className="results-section">
-                    <h4>Results</h4>
-                    <div><strong>The character was:</strong> {question}</div>
-                    <h5>All Answers:</h5>
-                    <ul>
-                      {roomData.PlayersName.map(player => (
-                        <li key={player}>
-                          <strong>{player}:</strong> {answers[player] || "No answer"}
-                        </li>
-                      ))}
-                    </ul>
-                    <h5>Voting Results:</h5>
-                    <div>
-                      {Object.entries(votes).length > 0
-                        ? Object.entries(votes).map(([voter, voted]) => (
-                          <div key={voter}>{voter} voted for {voted}</div>
-                        ))
-                        : "No votes yet"}
-                    </div>
-                  </div>
-                )}
-              </>
+            {roomData?.gameType === "Guess the character" && (
+              <GuessCharacterSection
+                roomData={roomData}
+                roles={roles}
+                username={username}
+                answers={answers}
+                votes={votes}
+                showVoting={showVoting}
+                showResults={showResults}
+                handleAnswer={handleAnswer}
+                handleVote={handleVote}
+              />
             )}
-
             {roomData?.gameType === "Answer the question" && (
-              <>
-                <h3>Answer the Question</h3>
-                <div className="game-info">
-                  <p><strong>Your question:</strong> {roles[username!] || "Loading..."}</p>
-                  <p><em>Answer your question. One player has a different question - find the imposter!</em></p>
-                </div>
-
-                {!answers[username!] && (
-                  <div className="answer-section">
-                    <input
-                      type="text"
-                      placeholder="Your answer"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleAnswer(e.currentTarget.value);
-                        }
-                      }}
-                    />
-                    <button className="submit-btn" onClick={(e) => {
-                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                      handleAnswer(input.value);
-                    }}>
-                      Submit Answer
-                    </button>
-                  </div>
-                )}
-
-                {Object.keys(answers).length >= (roomData?.PlayersName.length || 0) && (
-                  <>
-                    <div className="main-question">
-                      <strong>Main question (non-imposters):</strong> {question}
-                    </div>
-                    <h5>All Answers:</h5>
-                    <ul>
-                      {roomData.PlayersName.map(player => (
-                        <li key={player}>
-                          <strong>{player}:</strong> {answers[player] || "No answer"}
-                        </li>
-                      ))}
-                    </ul>
-
-                    {!votes[username!] && (
-                      <div className="voting-section">
-                        <h4>Vote: Who is the imposter?</h4>
-                        <div className="vote-buttons">
-                          {roomData.PlayersName.filter(p => p !== username).map(player => (
-                            <button className="vote-btn" key={player} onClick={() => handleVote(player)}>
-                              {player}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {showResults && (
-                  <div className="results-section">
-                    <h4>Results</h4>
-                    <div><strong>Main question:</strong> {question}</div>
-                    <div><strong>Imposter was:</strong> {imposter}</div>
-
-                    <h5>All Answers:</h5>
-                    <ul>
-                      {roomData.PlayersName.map(player => (
-                        <li key={player}>
-                          <strong>{player}:</strong> {answers[player] || "No answer"}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div>
-                      {Object.values(votes).filter(v => v === imposter).length > (roomData.PlayersName.length / 2)
-                        ? "✅ Imposter caught!" : "❌ Imposter survived!"}
-                    </div>
-                  </div>
-                )}
-              </>
+              <AnswerQuestionSection
+                roomData={roomData}
+                roles={roles}
+                username={username}
+                answers={answers}
+                votes={votes}
+                showResults={showResults}
+                handleAnswer={handleAnswer}
+                handleVote={handleVote}
+                question={question}
+                imposter={imposter}
+              />
             )}
-
             {roomData?.gameType === "Night Mafia" && (
-              <>
-                <h3>Night Mafia</h3>
-                <div className="game-info">
-                  <p><strong>Your role:</strong> {roles[username!] || "Loading..."}</p>
-                </div>
-
-                <div className="players-roles">
-                  <h4>All Players:</h4>
-                  <ul>
-                    {roomData.PlayersName.map(player => (
-                      <li key={player}>
-                        {player}: {player === username ? <strong>{roles[player]}</strong> : "Hidden"}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {!showResults && (
-                  <div className="night-actions">
-                    {(!mafiaActions[username!]) ? (
-                      <>
-                        {roles[username!] === "Mafia" && (
-                          <div>
-                            <label>Choose someone to kill:</label>
-                            <select id="mafia-kill">
-                              {roomData.PlayersName.filter(p => p !== username).map(player => (
-                                <option key={player} value={player}>{player}</option>
-                              ))}
-                            </select>
-                            <button
-                              className="submit-btn"
-                              onClick={() => {
-                                const select = document.getElementById("mafia-kill") as HTMLSelectElement;
-                                handleNightMafiaAction({ mafia: select.value });
-                              }}
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        )}
-                        {roles[username!] === "Doctor" && (
-                          <div>
-                            <label>Choose someone to save:</label>
-                            <select id="doctor-save">
-                              {roomData.PlayersName.map(player => (
-                                <option key={player} value={player}>{player}</option>
-                              ))}
-                            </select>
-                            <button
-                              className="submit-btn"
-                              onClick={() => {
-                                const select = document.getElementById("doctor-save") as HTMLSelectElement;
-                                handleNightMafiaAction({ doctor: select.value });
-                              }}
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        )}
-                        {roles[username!] === "Police" && (
-                          <div>
-                            <label>Choose someone to investigate:</label>
-                            <select id="police-investigate">
-                              {roomData.PlayersName.filter(p => p !== username).map(player => (
-                                <option key={player} value={player}>{player}</option>
-                              ))}
-                            </select>
-                            <button
-                              className="submit-btn"
-                              onClick={() => {
-                                const select = document.getElementById("police-investigate") as HTMLSelectElement;
-                                handleNightMafiaAction({ police: select.value });
-                              }}
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        )}
-                        {roles[username!] === "Civilian" && (
-                          <div>
-                            <button className="submit-btn" onClick={() => handleNightMafiaAction({ ready: true })}>
-                              Ready
-                            </button>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div>
-                        <strong>Action submitted. Waiting for others...</strong>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {showResults && (
-                  <div className="results-section">
-                    <h4>Night Results</h4>
-                    <div>
-                      {Object.entries(mafiaActions).map(([player, action]) => (
-                        <div key={player}>
-                          <strong>{player}:</strong>{" "}
-                          {typeof action === "object" && action !== null && "mafia" in action && (action as any).mafia && `Mafia tried to kill ${(action as any).mafia}`}
-                          {typeof action === "object" && action !== null && "doctor" in action && (action as any).doctor && `Doctor tried to save ${(action as any).doctor}`}
-                          {typeof action === "object" && action !== null && "police" in action && (action as any).police && `Police investigated ${(action as any).police}`}
-                          {typeof action === "object" && action !== null && "ready" in action && (action as any).ready && "Ready"}
-                        </div>
-                      ))}
-                    </div>
-                    {(() => {
-                      const mafiaAction = Object.values(mafiaActions).find(
-                        (a: any) => typeof a === "object" && a !== null && "mafia" in a
-                      );
-                      const doctorAction = Object.values(mafiaActions).find(
-                        (a: any) => typeof a === "object" && a !== null && "doctor" in a
-                      );
-                      let result = "";
-                      if (
-                        mafiaAction &&
-                        doctorAction &&
-                        typeof mafiaAction === "object" &&
-                        typeof doctorAction === "object" &&
-                        mafiaAction !== null &&
-                        doctorAction !== null &&
-                        "mafia" in mafiaAction &&
-                        "doctor" in doctorAction &&
-                        (mafiaAction as any).mafia === (doctorAction as any).doctor
-                      ) {
-                        result = `${(mafiaAction as any).mafia} was saved by the doctor!`;
-                      } else if (
-                        mafiaAction &&
-                        typeof mafiaAction === "object" &&
-                        mafiaAction !== null &&
-                        "mafia" in mafiaAction
-                      ) {
-                        result = `${(mafiaAction as any).mafia} was eliminated!`;
-                      } else {
-                        result = "No one was eliminated.";
-                      }
-                      return <div>{result}</div>;
-                    })()}
-                  </div>
-                )}
-              </>
+              <NightMafiaSection
+                roomData={roomData}
+                roles={roles}
+                username={username}
+                mafiaActions={mafiaActions}
+                showResults={showResults}
+                handleNightMafiaAction={handleNightMafiaAction}
+              />
             )}
-
             {roomData?.gameType === "Raja Rani Chor Police" && (
-              <>
-                <h3>Raja Rani Chor Police</h3>
-                <div className="game-info">
-                  <p><strong>Your role:</strong> {roles[username!] || "Loading..."}</p>
-                </div>
-
-                <div className="players-roles">
-                  <h4>All Players:</h4>
-                  <ul>
-                    {roomData.PlayersName.map(player => (
-                      <li key={player}>
-                        {player}: {player === username ? <strong>{roles[player]}</strong> : "Hidden"}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {isHost && !showResults && (
-                  <div className="host-actions">
-                    <h4>Host: Enter Actions</h4>
-                    <div>
-                      <label>Police guesses Chor:</label>
-                      <input
-                        placeholder="Player name"
-                        onBlur={e => setRRCPResult((prev: any) => ({ ...prev, policeGuess: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <label>Chor targets:</label>
-                      <input
-                        placeholder="Player name"
-                        onBlur={e => setRRCPResult((prev: any) => ({ ...prev, chorTarget: e.target.value }))}
-                      />
-                    </div>
-                    <button className="submit-btn" onClick={() => handleRRCPResult(rrcpResult)}>
-                      Submit Actions
-                    </button>
-                  </div>
-                )}
-
-                {showResults && (
-                  <div className="results-section">
-                    <h4>Results</h4>
-                    <div>Police guessed: {rrcpResult?.policeGuess}</div>
-                    <div>Chor targeted: {rrcpResult?.chorTarget}</div>
-                    <div>
-                      {Object.entries(roles).map(([player, role]) => (
-                        <div key={player}><strong>{player}:</strong> {role}</div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
+              <RRCPSection
+                roomData={roomData}
+                roles={roles}
+                username={username}
+                isHost={isHost}
+                rrcpResult={rrcpResult}
+                showResults={showResults}
+                setRRCPResult={setRRCPResult}
+                handleRRCPResult={handleRRCPResult}
+              />
             )}
           </div>
         )}

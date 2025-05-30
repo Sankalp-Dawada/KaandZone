@@ -35,6 +35,9 @@ interface RoomData {
     mafiaActions: any;
     rrcpResult: any;
     theme?: string;
+    roundNumber?: number;
+    roundPoints?: any[]; // array of objects, not arrays
+    assignPointsDone?: boolean; // <-- add this line
   };
 }
 
@@ -54,6 +57,9 @@ function Room() {
   const [showVoting, setShowVoting] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [mafiaActions, setMafiaActions] = useState<any>({});
+  const [roundNumber, setRoundNumber] = useState(1);
+  const [roundPoints, setRoundPoints] = useState<any[]>([]); // array of objects, not arrays
+  const [assignDisabled, setAssignDisabled] = useState(false);
 
   const roomname = localStorage.getItem("roomname");
   const username = localStorage.getItem("username");
@@ -77,6 +83,10 @@ function Room() {
 
       const data = doc.data() as RoomData;
       setRoomData(data);
+
+      // Add round tracking
+      setRoundNumber(data.gameState?.roundNumber || 1);
+      setRoundPoints(data.gameState?.roundPoints || []);
 
 
       setEditingPoints(
@@ -452,6 +462,138 @@ function Room() {
     await updateGameState(roomname, newGameState, db);
   };
 
+  // Assign points logic per game
+  const handleAssignPoints = async () => {
+    if (!roomData || !roomname) return;
+    setAssignDisabled(true);
+    let newPoints = [...roomData.Points];
+    let roundPts: Record<string, number> = {};
+    const players = roomData.PlayersName;
+
+    // Initialize roundPts for all players
+    players.forEach((p) => { roundPts[p] = 0; });
+
+    if (roomData.gameType === "Raja Rani Chor Police") {
+      // Find roles
+      const roles = roomData.gameState?.roles || {};
+      const result = roomData.gameState?.rrcpResult || {};
+      let chor = "", raja = "", rani = ""; // removed police
+      players.forEach((p) => {
+        if (roles[p] === "Chor") chor = p;
+        if (roles[p] === "Raja") raja = p;
+        if (roles[p] === "Rani") rani = p;
+      });
+      let chorTarget = "", policeGuess = "";
+      Object.values(result).forEach((action: any) => {
+        if (action.chorTarget) chorTarget = action.chorTarget;
+        if (action.policeGuess) policeGuess = action.policeGuess;
+      });
+      // Scoring
+      players.forEach((p) => {
+        if (roles[p] === "Police") {
+          roundPts[p] = (policeGuess === chor) ? 100 : 0;
+        } else if (roles[p] === "Chor") {
+          if (policeGuess === chor) roundPts[p] = 0;
+          else {
+            if (chorTarget === raja) roundPts[p] = 100;
+            else if (chorTarget === rani) roundPts[p] = 50;
+            else if (roles[chorTarget] === "Civilian") roundPts[p] = 10;
+            else roundPts[p] = 0;
+          }
+        } else if (p === chorTarget && policeGuess !== chor) {
+          roundPts[p] = 0;
+        } else if (roles[p] === "Raja") {
+          roundPts[p] = (policeGuess === chor || chorTarget !== p) ? 100 : 0;
+        } else if (roles[p] === "Rani") {
+          roundPts[p] = (policeGuess === chor || chorTarget !== p) ? 50 : 0;
+        } else if (roles[p] === "Civilian") {
+          roundPts[p] = (policeGuess === chor || chorTarget !== p) ? 10 : 0;
+        }
+      });
+    } else if (roomData.gameType === "Guess the character") {
+      // Give 50 points to the player who got most votes
+      const votes = roomData.gameState?.votes || {};
+      const players = roomData.PlayersName;
+      const voteCounts: Record<string, number> = {};
+      Object.values(votes).forEach((v: string) => {
+        voteCounts[v] = (voteCounts[v] || 0) + 1;
+      });
+      let maxVotes = 0, winners: string[] = [];
+      players.forEach((p) => {
+        if ((voteCounts[p] || 0) > maxVotes) maxVotes = voteCounts[p] || 0;
+      });
+      players.forEach((p) => {
+        if ((voteCounts[p] || 0) === maxVotes && maxVotes > 0) winners.push(p);
+      });
+      players.forEach((p) => {
+        roundPts[p] = winners.includes(p) ? 50 : 0;
+      });
+    } else if (roomData.gameType === "Answer the question") {
+      // All who voted for imposter get 20, imposter gets 40 if survived
+      const votes = roomData.gameState?.votes || {};
+      const imposter = roomData.gameState?.imposter;
+      let impVotes = 0;
+      Object.values(votes).forEach((v: string) => {
+        if (v === imposter) impVotes++;
+      });
+      players.forEach((p) => {
+        roundPts[p] = (votes[p] === imposter) ? 20 : 0;
+      });
+      if (imposter && players.includes(imposter)) {
+        roundPts[imposter] = impVotes > (players.length / 2) ? 0 : 40;
+      }
+    }
+    // ...add more games as needed...
+
+    // Add roundPts to total
+    newPoints = players.map((p, idx) => (newPoints[idx] || 0) + (roundPts[p] || 0));
+    const newRoundPoints = [...roundPoints, roundPts];
+
+    try {
+      const roomRef = doc(db, "rooms", roomname);
+      await updateDoc(roomRef, {
+        Points: newPoints,
+        "gameState.roundPoints": newRoundPoints,
+        "gameState.assignPointsDone": true // mark as done for this round
+      });
+      // No alert
+    } catch (e) {
+      setAssignDisabled(false);
+      alert("Failed to assign points: " + e);
+    }
+  };
+
+  // Start next round: increment roundNumber, reset only round-specific state, keep roundPoints and roundNumber
+  const handleStartNextRound = async () => {
+    if (!roomname || !isHost) return;
+    setAssignDisabled(false);
+    try {
+      const roomRef = doc(db, "rooms", roomname);
+      await updateDoc(roomRef, {
+        "gameState.roundStarted": false,
+        "gameState.roles": {},
+        "gameState.question": "",
+        "gameState.imposter": "",
+        "gameState.answers": {},
+        "gameState.votes": {},
+        "gameState.showVoting": false,
+        "gameState.showResults": false,
+        "gameState.mafiaActions": {},
+        "gameState.rrcpResult": null,
+        "gameState.roundNumber": (roomData?.gameState?.roundNumber || 1) + 1,
+        // Do NOT touch roundPoints! (leave as is)
+        "gameState.assignPointsDone": false // reset for next round
+      });
+    } catch (error) {
+      alert("Failed to start next round: " + error);
+    }
+  };
+
+  // Disable Assign Points button if already assigned for this round
+  useEffect(() => {
+    setAssignDisabled(!!roomData?.gameState?.assignPointsDone);
+  }, [roomData?.gameState?.assignPointsDone, roundNumber]);
+
   if (loading) return (
     <>
       <Header />
@@ -483,7 +625,9 @@ function Room() {
         <div className="grid-overlay"></div>
       </div>
       <div className="content-wrapper">
-        <header className="room-header">Room: {roomData?.roomname}</header>
+        <header className="room-header">
+          Room: {roomData?.roomname} <span style={{marginLeft: 16}}>Round {roundNumber}</span>
+        </header>
 
         <div className="room-id-section">
           <div className="room-id-container">
@@ -541,6 +685,7 @@ function Room() {
           editingPoints={editingPoints}
           handlePointsChange={handlePointsChange}
           updatePoints={updatePoints}
+          roundPoints={roundPoints}
         />
 
         <RoomActions
@@ -605,6 +750,23 @@ function Room() {
             )}
           </div>
         )}
+
+        {/* Host controls after round ends (always show after results, not just when !roundStarted) */}
+        {isHost && roomData?.gameState?.showResults && (
+          <div style={{margin: "20px 0", display: "flex", gap: 16, justifyContent: "center"}}>
+            <button
+              className="update-btn"
+              onClick={handleAssignPoints}
+              disabled={assignDisabled}
+            >
+              Assign Points
+            </button>
+            <button className="start-btn" onClick={handleStartNextRound}>
+              Start Next Round
+            </button>
+          </div>
+        )}
+
       </div>
     </>
   );

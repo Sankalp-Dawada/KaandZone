@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-function RoomLeaderboard({ roomData, isHost, username, editingPoints, handlePointsChange, updatePoints }: any) {
+function RoomLeaderboard({ roomData, isHost, username, editingPoints, handlePointsChange, updatePoints, roundPoints }: any) {
+  const rounds = roundPoints?.length || 0;
   return (
     <div className="leaderboard">
       <h2>Leaderboard</h2>
@@ -10,7 +11,11 @@ function RoomLeaderboard({ roomData, isHost, username, editingPoints, handlePoin
             <tr>
               <th>Rank</th>
               <th>Player</th>
-              <th>Points</th>
+              {/* Show round columns */}
+              {Array.from({length: rounds}, (_, i) => (
+                <th key={i}>Round {i+1}</th>
+              ))}
+              <th>Total</th>
               {isHost && <th>Edit</th>}
             </tr>
           </thead>
@@ -30,6 +35,12 @@ function RoomLeaderboard({ roomData, isHost, username, editingPoints, handlePoin
                     {playerData.player === username && " (You)"}
                     {playerData.player === roomData?.createdBy && " (Host)"}
                   </td>
+                  {/* Show round points */}
+                  {Array.from({length: rounds}, (_, i) => (
+                    <td key={i}>
+                      {roundPoints?.[i]?.[playerData.player] ?? "-"}
+                    </td>
+                  ))}
                   <td>
                     {isHost ? (
                       <input

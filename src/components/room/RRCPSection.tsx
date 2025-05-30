@@ -32,6 +32,19 @@ const RRCPSection: React.FC<Props> = ({
     return allPlayers.every((p: string) => submittedResult[p]);
   };
 
+  // Automatically show results when all have submitted (host triggers)
+  React.useEffect(() => {
+    if (
+      isHost &&
+      !showResults &&
+      allSubmitted() &&
+      Object.keys(submittedResult).length === allPlayers.length
+    ) {
+      handleRRCPResult(submittedResult);
+    }
+    // eslint-disable-next-line
+  }, [isHost, showResults, submittedResult, allPlayers.length]);
+
   return (
     <>
       <h3>Raja Rani Chor Police</h3>
@@ -111,17 +124,9 @@ const RRCPSection: React.FC<Props> = ({
               <strong>Action submitted. Waiting for others...</strong>
             </div>
           )}
-          {allSubmitted() && isHost && (
+          {allSubmitted() && (
             <div>
-              <strong>All players have submitted.</strong>
-              <button className="submit-btn" onClick={() => handleRRCPResult(submittedResult)}>
-                Show Results
-              </button>
-            </div>
-          )}
-          {allSubmitted() && !isHost && (
-            <div>
-              <strong>All players have submitted. Waiting for host to show results...</strong>
+              <strong>All players have submitted. Waiting for results...</strong>
             </div>
           )}
         </div>

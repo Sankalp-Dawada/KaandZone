@@ -54,7 +54,6 @@ function Room() {
   const [showVoting, setShowVoting] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [mafiaActions, setMafiaActions] = useState<any>({});
-  const [rrcpResult, setRRCPResult] = useState<any>(null);
 
   const roomname = localStorage.getItem("roomname");
   const username = localStorage.getItem("username");
@@ -97,7 +96,6 @@ function Room() {
         setShowVoting(data.gameState.showVoting || false);
         setShowResults(data.gameState.showResults || false);
         setMafiaActions(data.gameState.mafiaActions || {});
-        setRRCPResult(data.gameState.rrcpResult);
       }
 
       setLoading(false);
@@ -383,6 +381,7 @@ function Room() {
   };
 
   const handleRRCPResult = async (result: any) => {
+    if (!roomname) return;
     const newGameState = {
       ...roomData?.gameState,
       rrcpResult: result,
@@ -439,6 +438,18 @@ function Room() {
       showResults: allSubmitted
     };
     await updateGameState(roomname!, newGameState, db);
+  };
+
+  const handleRRCPAction = async (action: any) => {
+    if (!roomData || !roomData.gameState || !username || !roomname) return;
+    const updatedResult = { ...(roomData.gameState.rrcpResult || {}), [username]: action };
+    const allSubmitted = Object.keys(updatedResult).length >= roomData.PlayersName.length;
+    const newGameState = {
+      ...roomData.gameState,
+      rrcpResult: updatedResult,
+      showResults: allSubmitted && isHost ? false : roomData.gameState.showResults 
+    };
+    await updateGameState(roomname, newGameState, db);
   };
 
   if (loading) return (
@@ -586,9 +597,9 @@ function Room() {
                 roles={roles}
                 username={username}
                 isHost={isHost}
-                rrcpResult={rrcpResult}
-                showResults={showResults}
-                setRRCPResult={setRRCPResult}
+                rrcpResult={roomData?.gameState?.rrcpResult}
+                showResults={!!roomData?.gameState?.showResults}
+                handleRRCPAction={handleRRCPAction}
                 handleRRCPResult={handleRRCPResult}
               />
             )}

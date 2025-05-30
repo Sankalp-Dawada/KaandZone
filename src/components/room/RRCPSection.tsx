@@ -8,7 +8,7 @@ interface Props {
   isHost: boolean;
   rrcpResult: any;
   showResults: boolean;
-  setRRCPResult: (result: any) => void;
+  handleRRCPAction: (action: any) => void;
   handleRRCPResult: (result: any) => void;
 }
 
@@ -16,29 +16,20 @@ const RRCPSection: React.FC<Props> = ({
   roomData,
   roles,
   username,
+  isHost,
   rrcpResult,
   showResults,
-  setRRCPResult,
+  handleRRCPAction,
   handleRRCPResult,
 }) => {
   const playerRole = roles[username!];
   const allPlayers = roomData.PlayersName;
-  
+
+  const submittedResult = rrcpResult || {};
+
   const allSubmitted = () => {
-    if (!rrcpResult) return false;
-    return allPlayers.every((p: string) => rrcpResult[p]);
-  };
-
-  const handleAction = (action: any) => {
-    setRRCPResult((prev: any) => ({
-      ...prev,
-      [username!]: action,
-    }));
-  };
-
-
-  const handleSubmitAll = () => {
-    handleRRCPResult(rrcpResult);
+    if (!submittedResult) return false;
+    return allPlayers.every((p: string) => submittedResult[p]);
   };
 
   return (
@@ -48,7 +39,6 @@ const RRCPSection: React.FC<Props> = ({
         <p>
           <strong>Your role:</strong> {playerRole || "Loading..."}
         </p>
-    
         {Object.entries(roles).map(([player, role]) =>
           role === "Police" && player !== username ? (
             <p key={player}>
@@ -69,7 +59,7 @@ const RRCPSection: React.FC<Props> = ({
       </div>
       {!showResults && (
         <div className="rrcp-actions">
-          {playerRole === "Chor" && !rrcpResult?.[username!] && (
+          {playerRole === "Chor" && !submittedResult?.[username!] && (
             <div>
               <label>Choose a player to steal from:</label>
               <select id="chor-steal">
@@ -83,14 +73,14 @@ const RRCPSection: React.FC<Props> = ({
                 className="submit-btn"
                 onClick={() => {
                   const select = document.getElementById("chor-steal") as HTMLSelectElement;
-                  handleAction({ chorTarget: select.value });
+                  handleRRCPAction({ chorTarget: select.value });
                 }}
               >
                 Submit
               </button>
             </div>
           )}
-          {playerRole === "Police" && !rrcpResult?.[username!] && (
+          {playerRole === "Police" && !submittedResult?.[username!] && (
             <div>
               <label>Choose a player as Chor:</label>
               <select id="police-guess">
@@ -102,32 +92,36 @@ const RRCPSection: React.FC<Props> = ({
                 className="submit-btn"
                 onClick={() => {
                   const select = document.getElementById("police-guess") as HTMLSelectElement;
-                  handleAction({ policeGuess: select.value });
+                  handleRRCPAction({ policeGuess: select.value });
                 }}
               >
                 Submit
               </button>
             </div>
           )}
-          {playerRole !== "Chor" && playerRole !== "Police" && !rrcpResult?.[username!] && (
+          {playerRole !== "Chor" && playerRole !== "Police" && !submittedResult?.[username!] && (
             <div>
-              <button className="submit-btn" onClick={() => handleAction({ ready: true })}>
+              <button className="submit-btn" onClick={() => handleRRCPAction({ ready: true })}>
                 Ready
               </button>
             </div>
           )}
-          {rrcpResult?.[username!] && (
+          {submittedResult?.[username!] && (
             <div>
               <strong>Action submitted. Waiting for others...</strong>
             </div>
           )}
-          
-          {allSubmitted() && (
+          {allSubmitted() && isHost && (
             <div>
               <strong>All players have submitted.</strong>
-              <button className="submit-btn" onClick={handleSubmitAll}>
+              <button className="submit-btn" onClick={() => handleRRCPResult(submittedResult)}>
                 Show Results
               </button>
+            </div>
+          )}
+          {allSubmitted() && !isHost && (
+            <div>
+              <strong>All players have submitted. Waiting for host to show results...</strong>
             </div>
           )}
         </div>
@@ -137,10 +131,9 @@ const RRCPSection: React.FC<Props> = ({
           <h4>Results</h4>
           <div>
             {(() => {
-              
               let policeGuess = "";
               let chorTarget = "";
-              Object.entries(rrcpResult || {}).forEach(([, action]: any) => {
+              Object.entries(submittedResult || {}).forEach(([, action]: any) => {
                 if (action.policeGuess) policeGuess = action.policeGuess;
                 if (action.chorTarget) chorTarget = action.chorTarget;
               });
